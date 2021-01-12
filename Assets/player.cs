@@ -12,7 +12,7 @@ public class player : MonoBehaviour
 
 	//JUMP
 	[SerializeField] private float flap = 550f;
-	[SerializeField] float moveSpeed = 6f;	
+		
 	int jumpCount = 0;
 
 	//SE
@@ -26,6 +26,8 @@ public class player : MonoBehaviour
 	//ジャンプボタン押下の判定（追加）
 	private bool isJButtonDown = false;
 
+	public float scroll = 5f;
+	float direction = 0f;
 
 
 
@@ -45,25 +47,31 @@ public class player : MonoBehaviour
 
 	void GetInputKey()
 	{
-		float x = Input.GetAxis("Horizontal");
-		animator.SetFloat("speed", Mathf.Abs(x));
-		if ((x< 0) || this.isRButtonDown)
-        {
-			transform.localScale = new Vector3(-1, 1, 1);
-        }
-		if ((x>0) || this.isLButtonDown)
-        {
+		animator.SetFloat("speed", Mathf.Abs(direction));
+		if (Input.GetKey(KeyCode.RightArrow) || this.isRButtonDown)
+		{
+			direction = 1f;
 			transform.localScale = new Vector3(1, 1, 1);
 		}
-		rb.velocity = new Vector2(x * moveSpeed, rb.velocity.y);
-		
-   
+		else if (Input.GetKey(KeyCode.LeftArrow) || this.isLButtonDown)
+		{
+			direction = -1f;
+			transform.localScale = new Vector3(-1, 1, 1);
+		}
+		else
+		{
+			direction = 0f;
+		}
+
+		rb.velocity = new Vector2(scroll * direction, rb.velocity.y);
+
 	}
 
 	void jump()
     {
 		if ((Input.GetKeyDown("space") || this.isJButtonDown) && jumpCount < 2)
 		{
+			this.isJButtonDown = false;
 			rb.AddForce(Vector2.up * flap);
 			jumpCount++;
 			audioSource.PlayOneShot(jumpSE);
@@ -89,9 +97,7 @@ public class player : MonoBehaviour
         {
 			Destroy(this.gameObject);
 			text.GameOver();
-			
-			
-        }
+		}
 
 		if (collision.gameObject.tag == "Clear")
         {
@@ -105,11 +111,6 @@ public class player : MonoBehaviour
 		this.isJButtonDown = true;
 	}
 
-	//ジャンプボタンを離した場合の処理（追加）
-	public void GetMyJumpButtonUp()
-	{
-		this.isJButtonDown = false;
-	}
 
 	//左ボタンを押し続けた場合の処理（追加）
 	public void GetMyLeftButtonDown()
